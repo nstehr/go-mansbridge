@@ -10,8 +10,7 @@ import (
 )
 
 const (
-	refreshInterval = 5 //refresh interval in seconds
-	cacheSize       = 10
+	cacheSize = 10
 )
 
 type Correspondent struct {
@@ -21,9 +20,10 @@ type Correspondent struct {
 	expectingReplyFrom string
 	wireService        wire.WireService
 	done               chan bool
+	refreshInterval    time.Duration
 }
 
-func NewCorrespondent(a agent.Agent, seedIp string, wireService wire.WireService) *Correspondent {
+func NewCorrespondent(a agent.Agent, seedIp string, wireService wire.WireService, refreshInterval int) *Correspondent {
 	peers := collections.NewPeerList()
 	peers.Add(seedIp)
 	doneChan := make(chan bool)
@@ -32,7 +32,8 @@ func NewCorrespondent(a agent.Agent, seedIp string, wireService wire.WireService
 		wireService:        wireService,
 		expectingReplyFrom: "",
 		peers:              peers,
-		done:               doneChan}
+		done:               doneChan,
+		refreshInterval:    time.Duration(refreshInterval)}
 
 	go c.listenForRemoteUpdates()
 
@@ -41,14 +42,15 @@ func NewCorrespondent(a agent.Agent, seedIp string, wireService wire.WireService
 
 func (c *Correspondent) listenForRemoteUpdates() {
 	for msg := range c.wireService.GetNews() {
-		log.Println("Msg from: " + msg.Source)
 		//if we aren't expecting a reply, we were
 		//the randomly selected remote, so send our
 		//cache over
 		if c.expectingReplyFrom != msg.Source {
+			log.Println("Msg from: " + msg.Source)
 			go c.wireService.SendNews(msg.Source, c.cache.GetEntries())
 		} else {
 			//this is a reply, so we can clear that we got it
+			log.Println("Reply from: " + msg.Source)
 			c.expectingReplyFrom = ""
 		}
 		var remoteNews []agent.NewsItem
@@ -69,7 +71,7 @@ func (c *Correspondent) listenForRemoteUpdates() {
 }
 
 func (c *Correspondent) StartReporting() {
-	tick := time.NewTicker(time.Second * refreshInterval).C
+	tick := time.NewTicker(time.Second * c.refreshInterval).C
 
 	for {
 		select {
@@ -83,6 +85,7 @@ func (c *Correspondent) StartReporting() {
 			//step 2, find a random peer
 			peer := findPeer(c.peers.GetAll())
 			//step 3, send cache to peer
+			log.Println("Sending cache to: " + peer)
 			c.wireService.SendNews(peer, c.cache.GetEntries())
 			//keep track of who we sent to, so we can expect a response
 			c.expectingReplyFrom = peer
