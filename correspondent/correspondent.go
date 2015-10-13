@@ -20,6 +20,7 @@ type Correspondent struct {
 	expectingReplyFrom string
 	wireService        wire.WireService
 	done               chan bool
+	repliantRequest    chan chan string //should this be part of the struct?
 	refreshInterval    time.Duration
 }
 
@@ -33,7 +34,8 @@ func NewCorrespondent(a agent.Agent, seedIp string, wireService wire.WireService
 		expectingReplyFrom: "",
 		peers:              peers,
 		done:               doneChan,
-		refreshInterval:    time.Duration(refreshInterval)}
+		refreshInterval:    time.Duration(refreshInterval),
+		repliantRequest:    make(chan chan string)}
 
 	go c.listenForRemoteUpdates()
 
@@ -45,7 +47,10 @@ func (c *Correspondent) listenForRemoteUpdates() {
 		//if we aren't expecting a reply, we were
 		//the randomly selected remote, so send our
 		//cache over
-		if c.expectingReplyFrom != msg.Source {
+		repliantResponseCh := make(chan string)
+		c.repliantRequest <- repliantResponseCh
+		expectedRepliant := <-repliantResponseCh
+		if expectedRepliant != msg.Source {
 			log.Println("Msg from: " + msg.Source)
 			go c.wireService.SendNews(msg.Source, c.cache.GetEntries())
 		} else {
@@ -72,7 +77,7 @@ func (c *Correspondent) listenForRemoteUpdates() {
 
 func (c *Correspondent) StartReporting() {
 	tick := time.NewTicker(time.Second * c.refreshInterval).C
-
+	expectedRepliant := ""
 	for {
 		select {
 		case <-tick:
@@ -88,8 +93,10 @@ func (c *Correspondent) StartReporting() {
 			log.Println("Sending cache to: " + peer)
 			c.wireService.SendNews(peer, c.cache.GetEntries())
 			//keep track of who we sent to, so we can expect a response
-			c.expectingReplyFrom = peer
-
+			expectedRepliant = peer
+		case ch := <-c.repliantRequest:
+			ch <- expectedRepliant
+			expectedRepliant = ""
 		case <-c.done:
 			log.Println("Done")
 			return
