@@ -29,7 +29,7 @@ func main() {
 	agentId := generateId()
 	log.Println("Agent: " + agentId)
 
-	encoder := wire.GobCacheEncoder{}
+	encoder := wire.GobWireEncoder{}
 	wireService := wire.NewUdpWireService(*port, encoder)
 
 	c := correspondent.NewCorrespondent(TestAgent{id: agentId}, *seed, wireService)

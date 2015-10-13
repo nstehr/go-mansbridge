@@ -5,9 +5,9 @@ import (
 	"encoding/gob"
 )
 
-type GobCacheEncoder struct{}
+type GobWireEncoder struct{}
 
-func (g GobCacheEncoder) Encode(wireMsg WireMessage) ([]byte, error) {
+func (g GobWireEncoder) Encode(wireMsg WireMessage) ([]byte, error) {
 	var buf bytes.Buffer
 	if err := gob.NewEncoder(&buf).Encode(wireMsg); err != nil {
 		return nil, err
@@ -15,7 +15,7 @@ func (g GobCacheEncoder) Encode(wireMsg WireMessage) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func (g GobCacheEncoder) Decode(data []byte, numBytes int) (WireMessage, error) {
+func (g GobWireEncoder) Decode(data []byte, numBytes int) (WireMessage, error) {
 	msg := WireMessage{}
 	if err := gob.NewDecoder(bytes.NewReader(data[:numBytes])).Decode(&msg); err != nil {
 		return msg, err

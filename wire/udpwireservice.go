@@ -10,7 +10,7 @@ import (
 
 type UdpWireService struct {
 	port    int
-	encoder CacheEncoder
+	encoder WireEncoder
 	address string
 }
 
@@ -35,8 +35,8 @@ func getAddress(port int) string {
 	return ""
 }
 
-func NewUdpWireService(port int, cacheEncoder CacheEncoder) *UdpWireService {
-	return &UdpWireService{port: port, encoder: cacheEncoder, address: getAddress(port)}
+func NewUdpWireService(port int, wireEncoder WireEncoder) *UdpWireService {
+	return &UdpWireService{port: port, encoder: wireEncoder, address: getAddress(port)}
 }
 
 func (service *UdpWireService) SendNews(correspondent string, entries []collections.Entry) {
