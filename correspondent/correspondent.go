@@ -14,14 +14,13 @@ const (
 )
 
 type Correspondent struct {
-	agent              agent.Agent
-	cache              *collections.Cache
-	peers              *collections.PeerList
-	expectingReplyFrom string
-	wireService        wire.WireService
-	done               chan bool
-	repliantRequest    chan chan string //should this be part of the struct?
-	refreshInterval    time.Duration
+	agent           agent.Agent
+	cache           *collections.Cache
+	peers           *collections.PeerList
+	wireService     wire.WireService
+	done            chan bool
+	repliantRequest chan chan string //should this be part of the struct?
+	refreshInterval time.Duration
 }
 
 func NewCorrespondent(a agent.Agent, seedIp string, wireService wire.WireService, refreshInterval int) *Correspondent {
@@ -29,13 +28,12 @@ func NewCorrespondent(a agent.Agent, seedIp string, wireService wire.WireService
 	peers.Add(seedIp)
 	doneChan := make(chan bool)
 	c := Correspondent{agent: a,
-		cache:              collections.NewCache(cacheSize),
-		wireService:        wireService,
-		expectingReplyFrom: "",
-		peers:              peers,
-		done:               doneChan,
-		refreshInterval:    time.Duration(refreshInterval),
-		repliantRequest:    make(chan chan string)}
+		cache:           collections.NewCache(cacheSize),
+		wireService:     wireService,
+		peers:           peers,
+		done:            doneChan,
+		refreshInterval: time.Duration(refreshInterval),
+		repliantRequest: make(chan chan string)}
 
 	go c.listenForRemoteUpdates()
 
@@ -54,9 +52,9 @@ func (c *Correspondent) listenForRemoteUpdates() {
 			log.Println("Msg from: " + msg.Source)
 			go c.wireService.SendNews(msg.Source, c.cache.GetEntries())
 		} else {
-			//this is a reply, so we can clear that we got it
+			//this is a reply, so we don't need to send our cache,
+			//because we already did
 			log.Println("Reply from: " + msg.Source)
-			c.expectingReplyFrom = ""
 		}
 		var remoteNews []agent.NewsItem
 		for _, entry := range msg.Entries {
