@@ -53,8 +53,13 @@ func (c *Correspondent) listenForRemoteUpdates() {
 			log.Println("Reply from: " + msg.Source)
 		}
 		var remoteNews []agent.NewsItem
+		remoteTime := msg.CurrentTime
+		localTime := time.Now()
+		timeDiff := remoteTime.Sub(localTime)
 		for _, entry := range msg.Entries {
 			if entry.IpAddress != c.wireService.GetAddress() {
+				//normalize the time
+				entry.Timestamp = entry.Timestamp.Add(timeDiff)
 				//collect the non-local news to pass to the agent
 				remoteNews = append(remoteNews, entry.News)
 				//update the list of peers that we can send to
