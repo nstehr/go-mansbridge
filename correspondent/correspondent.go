@@ -9,10 +9,6 @@ import (
 	"time"
 )
 
-const (
-	cacheSize = 10
-)
-
 type Correspondent struct {
 	agent           agent.Agent
 	cache           *collections.Cache
@@ -23,7 +19,7 @@ type Correspondent struct {
 	refreshInterval time.Duration
 }
 
-func NewCorrespondent(a agent.Agent, seedIp string, wireService wire.WireService, refreshInterval int) *Correspondent {
+func NewCorrespondent(a agent.Agent, wireService wire.WireService, refreshInterval int, seedIp string, cacheSize int) *Correspondent {
 	peers := collections.NewPeerList()
 	peers.Add(seedIp)
 	doneChan := make(chan bool)

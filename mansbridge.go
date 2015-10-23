@@ -25,6 +25,7 @@ func main() {
 	port := flag.Int("port", 10001, "Port To Listen For News On")
 	seed := flag.String("seed", "localhost", "Initial Known Peer")
 	delay := flag.Int("delay", 45, "News checking delay (s)")
+	cacheSize := flag.Int("cacheSize", 10, "Size of the correspondent cache")
 	flag.Parse()
 
 	agentId := generateId()
@@ -33,7 +34,7 @@ func main() {
 	encoder := wire.GobWireEncoder{}
 	wireService := wire.NewUdpWireService(*port, encoder)
 
-	c := correspondent.NewCorrespondent(TestAgent{id: agentId}, *seed, wireService, *delay)
+	c := correspondent.NewCorrespondent(TestAgent{id: agentId}, wireService, *delay, *seed, *cacheSize)
 
 	c.StartReporting()
 
