@@ -15,7 +15,7 @@ Will hopefully expand to cover more of the details outlined in the original pape
   
   ```go 
      encoder := wire.GobWireEncoder{}
-	wireService := wire.NewUdpWireService(*port, encoder)
+	 wireService := wire.NewUdpWireService(*port, encoder)
 
 	c := correspondent.NewCorrespondent(TestAgent{id: agentId}, wireService, *delay, *seed, *cacheSize)
   ```
