@@ -3,7 +3,7 @@ in large agent-based distributed systems"
 
 Named for Canada's premiere newscaster, [Peter Mansbridge](https://en.wikipedia.org/wiki/Peter_Mansbridge) 
 
-As mentioned above this is a simplied implementation of the protocol outlined in the [original paper](http://www.cs.unibo.it/bison/publications/ap2pc03.pdf), based
+This is a simplied implementation of the protocol outlined in the [original paper](http://www.cs.unibo.it/bison/publications/ap2pc03.pdf), based
 on the author's subsequent paper on their own [implementation](http://www.soc.napier.ac.uk/~benp/dream/dreampaper17.pdf)
 
 Will hopefully expand to cover more of the details outlined in the original paper.
