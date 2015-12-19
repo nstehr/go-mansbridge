@@ -1,4 +1,4 @@
-package agent
+package mansbridge
 
 type NewsItem struct {
 	AgentId string

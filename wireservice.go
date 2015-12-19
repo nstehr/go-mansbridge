@@ -1,18 +1,17 @@
-package wire
+package mansbridge
 
 import (
-	"github.com/nstehr/go-mansbridge/collections"
 	"time"
 )
 
 type WireMessage struct {
-	Entries     []collections.Entry
+	Entries     []Entry
 	Source      string
 	CurrentTime time.Time
 }
 
 type WireService interface {
-	SendNews(correspondent string, entries []collections.Entry)
+	SendNews(correspondent string, entries []Entry)
 	GetNews() <-chan WireMessage
 	GetAddress() string
 }

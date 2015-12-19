@@ -1,30 +1,27 @@
-package correspondent
+package mansbridge
 
 import (
-	"github.com/nstehr/go-mansbridge/agent"
-	"github.com/nstehr/go-mansbridge/collections"
-	"github.com/nstehr/go-mansbridge/wire"
 	"log"
 	"math/rand"
 	"time"
 )
 
 type Correspondent struct {
-	agent           agent.Agent
-	cache           *collections.Cache
-	peers           *collections.PeerList
-	wireService     wire.WireService
+	agent           Agent
+	cache           *Cache
+	peers           *PeerList
+	wireService     WireService
 	done            chan bool
 	repliantRequest chan chan string //should this be part of the struct?
 	refreshInterval time.Duration
 }
 
-func NewCorrespondent(a agent.Agent, wireService wire.WireService, refreshInterval int, seedIp string, cacheSize int) *Correspondent {
-	peers := collections.NewPeerList()
+func NewCorrespondent(a Agent, wireService WireService, refreshInterval int, seedIp string, cacheSize int) *Correspondent {
+	peers := NewPeerList()
 	peers.Add(seedIp)
 	doneChan := make(chan bool)
 	c := Correspondent{agent: a,
-		cache:           collections.NewCache(cacheSize),
+		cache:           NewCache(cacheSize),
 		wireService:     wireService,
 		peers:           peers,
 		done:            doneChan,
@@ -52,7 +49,7 @@ func (c *Correspondent) listenForRemoteUpdates() {
 			//because we already did
 			log.Println("Reply from: " + msg.Source)
 		}
-		var remoteNews []agent.NewsItem
+		var remoteNews []NewsItem
 		remoteTime := msg.CurrentTime
 		localTime := time.Now()
 		timeDiff := remoteTime.Sub(localTime)
@@ -82,7 +79,7 @@ func (c *Correspondent) StartReporting() {
 		case <-tick:
 			log.Println("Checking for new news...")
 			//step 1, add news to cache
-			entry := collections.Entry{IpAddress: c.wireService.GetAddress(),
+			entry := Entry{IpAddress: c.wireService.GetAddress(),
 				Timestamp: time.Now(),
 				News:      c.agent.GetNews()}
 			c.cache.AddEntries(entry)

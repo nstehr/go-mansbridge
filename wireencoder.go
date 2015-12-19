@@ -1,4 +1,4 @@
-package wire
+package mansbridge
 
 type WireEncoder interface {
 	Encode(wireMsg WireMessage) ([]byte, error)

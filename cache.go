@@ -1,7 +1,6 @@
-package collections
+package mansbridge
 
 import (
-	"github.com/nstehr/go-mansbridge/agent"
 	"sort"
 	"sync"
 	"time"
@@ -16,7 +15,7 @@ type Cache struct {
 type Entry struct {
 	IpAddress string
 	Timestamp time.Time
-	News      agent.NewsItem
+	News      NewsItem
 }
 
 type Entries []Entry

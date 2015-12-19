@@ -1,8 +1,7 @@
-package wire
+package mansbridge
 
 import (
 	"fmt"
-	"github.com/nstehr/go-mansbridge/collections"
 	"log"
 	"net"
 	"time"
@@ -39,7 +38,7 @@ func NewUdpWireService(port int, wireEncoder WireEncoder) *UdpWireService {
 	return &UdpWireService{port: port, encoder: wireEncoder, address: getAddress(port)}
 }
 
-func (service *UdpWireService) SendNews(correspondent string, entries []collections.Entry) {
+func (service *UdpWireService) SendNews(correspondent string, entries []Entry) {
 	correspondentAddr, err := net.ResolveUDPAddr("udp", correspondent)
 	if err != nil {
 		log.Println("Error resolving: " + correspondent)
