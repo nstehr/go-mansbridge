@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-type Cache struct {
+type cache struct {
 	sync.RWMutex
 	entries  Entries
 	capacity int
@@ -32,18 +32,18 @@ func (entries Entries) Swap(i, j int) {
 	entries[i], entries[j] = entries[j], entries[i]
 }
 
-func NewCache(capacity int) *Cache {
+func newCache(capacity int) *cache {
 	var entries Entries
-	return &Cache{entries: entries, capacity: capacity}
+	return &cache{entries: entries, capacity: capacity}
 }
 
-func (c *Cache) AddEntries(newEntries ...Entry) {
+func (c *cache) addEntries(newEntries ...Entry) {
 	c.Lock()
 	c.entries = append(c.entries, newEntries...)
 	c.Unlock()
 }
 
-func (c *Cache) Resize() {
+func (c *cache) resize() {
 	c.Lock()
 	//definitely a more efficient way to hanlding this.
 	if len(c.entries) > c.capacity {
@@ -53,7 +53,7 @@ func (c *Cache) Resize() {
 	c.Unlock()
 }
 
-func (c *Cache) GetEntries() []Entry {
+func (c *cache) getEntries() []Entry {
 	c.Lock()
 	copyEntries := make([]Entry, len(c.entries))
 	copy(copyEntries, c.entries)

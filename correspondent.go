@@ -8,8 +8,8 @@ import (
 
 type Correspondent struct {
 	agent           Agent
-	cache           *Cache
-	peers           *PeerList
+	cache           *cache
+	peers           *peerList
 	wireService     WireService
 	done            chan bool
 	repliantRequest chan chan string //should this be part of the struct?
@@ -17,11 +17,11 @@ type Correspondent struct {
 }
 
 func NewCorrespondent(a Agent, wireService WireService, refreshInterval int, seedIp string, cacheSize int) *Correspondent {
-	peers := NewPeerList()
-	peers.Add(seedIp)
+	peers := newPeerList()
+	peers.add(seedIp)
 	doneChan := make(chan bool)
 	c := Correspondent{agent: a,
-		cache:           NewCache(cacheSize),
+		cache:           newCache(cacheSize),
 		wireService:     wireService,
 		peers:           peers,
 		done:            doneChan,
@@ -43,7 +43,7 @@ func (c *Correspondent) listenForRemoteUpdates() {
 		expectedRepliant := <-repliantResponseCh
 		if expectedRepliant != msg.Source {
 			log.Println("Msg from: " + msg.Source)
-			go c.wireService.SendNews(msg.Source, c.cache.GetEntries())
+			go c.wireService.SendNews(msg.Source, c.cache.getEntries())
 		} else {
 			//this is a reply, so we don't need to send our cache,
 			//because we already did
@@ -60,14 +60,14 @@ func (c *Correspondent) listenForRemoteUpdates() {
 				//collect the non-local news to pass to the agent
 				remoteNews = append(remoteNews, entry.News)
 				//update the list of peers that we can send to
-				c.peers.Add(entry.IpAddress)
+				c.peers.add(entry.IpAddress)
 			}
 		}
 		//pass the entries up to the agent
 		c.agent.NewsUpdate(remoteNews)
 		//add and refresh cache
-		c.cache.AddEntries(msg.Entries...)
-		c.cache.Resize()
+		c.cache.addEntries(msg.Entries...)
+		c.cache.resize()
 	}
 }
 
@@ -82,12 +82,12 @@ func (c *Correspondent) StartReporting() {
 			entry := Entry{IpAddress: c.wireService.GetAddress(),
 				Timestamp: time.Now(),
 				News:      c.agent.GetNews()}
-			c.cache.AddEntries(entry)
+			c.cache.addEntries(entry)
 			//step 2, find a random peer
-			peer := findPeer(c.peers.GetAll())
+			peer := findPeer(c.peers.getAll())
 			//step 3, send cache to peer
 			log.Println("Sending cache to: " + peer)
-			c.wireService.SendNews(peer, c.cache.GetEntries())
+			c.wireService.SendNews(peer, c.cache.getEntries())
 			//keep track of who we sent to, so we can expect a response
 			expectedRepliant = peer
 		case ch := <-c.repliantRequest:

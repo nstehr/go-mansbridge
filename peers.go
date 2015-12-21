@@ -6,16 +6,16 @@ import (
 
 //based on http://play.golang.org/p/_FvECoFvhq
 
-type PeerList struct {
+type peerList struct {
 	sync.RWMutex
 	set map[string]bool
 }
 
-func NewPeerList() *PeerList {
-	return &PeerList{set: make(map[string]bool)}
+func newPeerList() *peerList {
+	return &peerList{set: make(map[string]bool)}
 }
 
-func (set *PeerList) Add(i string) bool {
+func (set *peerList) add(i string) bool {
 	set.Lock()
 	_, found := set.set[i]
 	set.set[i] = true
@@ -23,14 +23,14 @@ func (set *PeerList) Add(i string) bool {
 	return !found
 }
 
-func (set *PeerList) Get(i string) bool {
+func (set *peerList) get(i string) bool {
 	set.RLock()
 	_, found := set.set[i]
 	set.Unlock()
 	return found
 }
 
-func (set *PeerList) GetAll() []string {
+func (set *peerList) getAll() []string {
 	set.RLock()
 	keys := make([]string, 0, len(set.set))
 	for k := range set.set {
@@ -40,7 +40,7 @@ func (set *PeerList) GetAll() []string {
 	return keys
 }
 
-func (set *PeerList) Remove(i string) {
+func (set *peerList) remove(i string) {
 	set.Lock()
 	delete(set.set, i)
 	set.Unlock()

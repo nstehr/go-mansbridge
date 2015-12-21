@@ -5,7 +5,7 @@ import (
 )
 
 type WireMessage struct {
-	Entries     []Entry
+	Entries     Entries
 	Source      string
 	CurrentTime time.Time
 }
