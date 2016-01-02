@@ -22,3 +22,7 @@ func (g GobWireEncoder) Decode(data []byte, numBytes int) (WireMessage, error) {
 	}
 	return msg, nil
 }
+
+func (g GobWireEncoder) RegisterType(v interface{}) {
+	gob.Register(v)
+}

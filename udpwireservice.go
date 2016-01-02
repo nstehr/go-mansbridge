@@ -52,7 +52,7 @@ func (service *UdpWireService) SendNews(correspondent string, entries []Entry) {
 	msg := WireMessage{Entries: entries, CurrentTime: time.Now(), Source: service.address}
 	data, err := service.encoder.Encode(msg)
 	if err != nil {
-		log.Println("Error encoding data")
+		log.Println("Error encoding data: " + err.Error())
 		return
 	}
 
