@@ -7,7 +7,7 @@ import (
 )
 
 type Correspondent struct {
-	agent           Agent
+	agent           *Agent
 	cache           *cache
 	peers           *peerList
 	wireService     WireService
@@ -16,7 +16,7 @@ type Correspondent struct {
 	refreshInterval time.Duration
 }
 
-func NewCorrespondent(a Agent, wireService WireService, refreshInterval int, seedIp string, cacheSize int) *Correspondent {
+func NewCorrespondent(a *Agent, wireService WireService, refreshInterval int, seedIp string, cacheSize int) *Correspondent {
 	peers := newPeerList()
 	peers.add(seedIp)
 	doneChan := make(chan bool)
@@ -64,7 +64,7 @@ func (c *Correspondent) listenForRemoteUpdates() {
 			}
 		}
 		//pass the entries up to the agent
-		c.agent.NewsUpdate(remoteNews)
+		c.agent.newsUpdate(remoteNews)
 		//add and refresh cache
 		c.cache.addEntries(msg.Entries...)
 		c.cache.resize()
@@ -77,19 +77,23 @@ func (c *Correspondent) StartReporting() {
 	for {
 		select {
 		case <-tick:
-			log.Println("Checking for new news...")
+			log.Println("Getting new news...")
 			//step 1, add news to cache
-			entry := Entry{IpAddress: c.wireService.GetAddress(),
-				Timestamp: time.Now(),
-				News:      c.agent.GetNews()}
-			c.cache.addEntries(entry)
-			//step 2, find a random peer
-			peer := findPeer(c.peers.getAll())
-			//step 3, send cache to peer
-			log.Println("Sending cache to: " + peer)
-			c.wireService.SendNews(peer, c.cache.getEntries())
-			//keep track of who we sent to, so we can expect a response
-			expectedRepliant = peer
+			news := c.agent.getNews()
+			if len(news.AgentId) > 0 {
+				entry := Entry{IpAddress: c.wireService.GetAddress(),
+					Timestamp: time.Now(),
+					News:      news}
+				c.cache.addEntries(entry)
+
+				//step 2, find a random peer
+				peer := findPeer(c.peers.getAll())
+				//step 3, send cache to peer
+				log.Println("Sending cache to: " + peer)
+				c.wireService.SendNews(peer, c.cache.getEntries())
+				//keep track of who we sent to, so we can expect a response
+				expectedRepliant = peer
+			}
 		case ch := <-c.repliantRequest:
 			ch <- expectedRepliant
 			expectedRepliant = ""
