@@ -16,7 +16,7 @@ Will hopefully expand to cover more of the details outlined in the original pape
   ```go
      encoder := mansbridge.GobWireEncoder{}
 	 wireService := mansbridge.NewUdpWireService(*port, encoder)
-     c := mansbridge.NewCorrespondent(TestAgent{id: agentId}, wireService, *delay, *seed, *cacheSize)
+     c := mansbridge.NewCorrespondent(mansbridge.NewAgent(agentID, 10), wireService, *delay, *seed, *cacheSize)
   ```
 
 * call ```Correspondent.StartReporting()``` this is a blocking call, so it is recommended to do this in a goroutine

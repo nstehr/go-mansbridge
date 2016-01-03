@@ -5,6 +5,8 @@ type NewsItem struct {
 	Item    interface{}
 }
 
+//buffer specifys the number of news items we
+//will hold in between getNews reads
 func NewAgent(agentId string, buffer int) *Agent {
 	r := make(chan NewsItem)
 	l := make(chan NewsItem, buffer)
